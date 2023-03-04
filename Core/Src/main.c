@@ -44,7 +44,7 @@ void SystemClock_Config(void)
 	}
 }
 
-
+I2C_HandleTypeDef hi2c1;
 static void MX_I2C1_Init(void)
 {
 	hi2c1.Instance = I2C1;
@@ -71,7 +71,7 @@ static void MX_I2C1_Init(void)
 	}
 }
 
-
+UART_HandleTypeDef huart1;
 static void MX_USART1_UART_Init(void)
 {
 	huart1.Instance = USART1;
