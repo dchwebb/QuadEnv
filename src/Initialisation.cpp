@@ -1,13 +1,10 @@
 #include "Initialisation.h"
 
-#include "stm32c031xx.h"
-//#include "stm32c0xx.h"
-//#include "core_cm0plus.h"
 
 void SystemClock_Config()
 {
 
-	volatile uint32_t tmpreg;
+	volatile uint32_t tmpreg [[maybe_unused]];
 
 	// Enable the APB2 peripheral clock
 	SET_BIT(RCC->APBENR2, RCC_APBENR2_SYSCFGEN);
