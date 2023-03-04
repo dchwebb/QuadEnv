@@ -31,12 +31,13 @@ int main(void)
 	SystemClock_Config();					// Configure the clock and PLL
 	SystemCoreClockUpdate();				// Update SystemCoreClock (system clock frequency) derived from settings of oscillators, prescalers and PLL
 	InitSysTick();
+	InitPWMTimer();
 
 //	InitIO();
 //	InitEnvTimer();
 	InitADC(reinterpret_cast<volatile uint16_t*>(&ADC_array));
 //	InitUart();
-//	InitCordic();
+
 
 
 	while (1) {
