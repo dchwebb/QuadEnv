@@ -33,6 +33,22 @@ void InitSysTick()
 }
 
 
+void InitIO()
+{
+	// MODER 00: Input mode, 01: General purpose output mode, 10: Alternate function mode, 11: Analog mode (reset state)
+
+	RCC->IOPENR |= RCC_IOPENR_GPIOAEN;			// reset and clock control - advanced high performance bus - GPIO port A
+	RCC->IOPENR |= RCC_IOPENR_GPIOBEN;			// reset and clock control - advanced high performance bus - GPIO port B
+	RCC->IOPENR |= RCC_IOPENR_GPIOCEN;			// reset and clock control - advanced high performance bus - GPIO port C
+
+	GPIOC->MODER &= ~GPIO_MODER_MODE13;			// configure PC13 gate 1 input
+
+//	GPIOB->MODER &= ~GPIO_MODER_MODER5;				// configure PB5  Env 1 Short input
+
+//	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR5_0;			// configure PB5  Env 1 Pull-up
+}
+
+
 void InitPWMTimer()
 {
 	// TIM3: Channel 1: *PA6 (AF1), PB4 (AF1), PB8 (AF3), PB6 (AF12), PB7 (AF11), PC6 (AF1)
@@ -71,10 +87,16 @@ void InitPWMTimer()
 	TIM3->CCR4 = 0x800;
 
 	TIM3->ARR = 0xFFF;								// Total number of PWM ticks = 4096
-	TIM3->PSC = 1;									// Should give ~7.8kHz
+	TIM3->PSC = 0;									// Should give ~11.7kHz
 	TIM3->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
-	TIM3->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E);		// Capture mode enabled / OC1 signal is output on the corresponding output pin
+	TIM3->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E);		// Capture mode enabled / OC1 signal is output on the corresponding output pin
 	TIM3->EGR |= TIM_EGR_UG;						// 1: Re-initialize the counter and generates an update of the registers
+
+	// Generate interrupt on Update
+	TIM3->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
+	NVIC_EnableIRQ(TIM3_IRQn);
+	NVIC_SetPriority(TIM3_IRQn, 0);					// Lower is higher priority
+
 	TIM3->CR1 |= TIM_CR1_CEN;						// Enable counter
 }
 

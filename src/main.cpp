@@ -1,11 +1,11 @@
 #include "initialisation.h"
-//#include "envelope.h"
+#include "envelope.h"
 //#include "uartHandler.h"
 #include <cmath>
 
 
 volatile uint32_t SysTickVal;
-volatile uint16_t ADC_array[ADC_BUFFER_LENGTH];
+volatile ADSR ADC_array;
 
 uint32_t buttonDebounce;
 //Envelopes envelopes;
@@ -32,8 +32,7 @@ int main(void)
 	SystemCoreClockUpdate();				// Update SystemCoreClock (system clock frequency) derived from settings of oscillators, prescalers and PLL
 	InitSysTick();
 	InitPWMTimer();
-
-//	InitIO();
+	InitIO();
 //	InitEnvTimer();
 	InitADC(reinterpret_cast<volatile uint16_t*>(&ADC_array));
 //	InitUart();
