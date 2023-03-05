@@ -24,7 +24,7 @@ public:
 private:
 	const float     timeStep = 1.0f / SAMPLERATE;	// one time unit - corresponding to sample time
 
-	bool            longADSR = true;			// True if using long ADSR settings (also tremolo)
+	bool            longADSR = true;			// True if using long ADSR settings
 	float           attack = 800.0f;			// Store the ADSR values based on the pot values (mainly for debugging)
 	uint16_t        decay = 0;
 	float           sustain = 4095.0f;
@@ -56,10 +56,11 @@ private:
 	bool     clockHigh;						// Record clock high state to detect clock transitions
 
 	Envelope envelope[4] = {
-			{&(TIM3->CCR1), GPIOB, 13, GPIOB,  5},		// PA4 Env1
-			{&(TIM3->CCR1), GPIOB, 14, GPIOB,  3},		// PA5 Env2
-			{&(TIM3->CCR1), GPIOB, 15, GPIOC, 10},		// PB1 Env3
-			{&(TIM3->CCR1), GPIOC,  6, GPIOB, 12} 		// PA2 Env4
+			{&(TIM3->CCR3), GPIOC, 13, GPIOB,  5},		// PA6 Env1
+			{&(TIM3->CCR2), GPIOB, 14, GPIOB,  3},		// PA7 Env2
+			{&(TIM3->CCR1), GPIOB, 15, GPIOC, 10},		// PA8 Env3
+			{&(TIM3->CCR4), GPIOC,  6, GPIOB, 12} 		// PB7 Env4
 	};
 };
 
+extern Envelopes envelopes;

@@ -7,12 +7,12 @@ void SysTick_Handler(void)
 void TIM3_IRQHandler() {
 	TIM3->SR &= ~TIM_SR_UIF;
 	//GPIOC->ODR |= GPIO_IDR_ID6;
-	if (TIM3->CCR3 == 0xFFF) {
-		TIM3->CCR3 = 0;
-	} else {
-		++TIM3->CCR3;
-	}
-	//envelopes.calcEnvelopes();
+//	if (TIM3->CCR3 == 0xFFF) {
+//		TIM3->CCR3 = 0;
+//	} else {
+//		++TIM3->CCR3;
+//	}
+	envelopes.calcEnvelopes();
 	//GPIOC->ODR &= ~GPIO_ODR_ODR_6;
 }
 

@@ -8,7 +8,7 @@ volatile uint32_t SysTickVal;
 volatile ADSR ADC_array;
 
 uint32_t buttonDebounce;
-//Envelopes envelopes;
+
 
 
 /*
@@ -33,7 +33,6 @@ int main(void)
 	InitSysTick();
 	InitPWMTimer();
 	InitIO();
-//	InitEnvTimer();
 	InitADC(reinterpret_cast<volatile uint16_t*>(&ADC_array));
 //	InitUart();
 
