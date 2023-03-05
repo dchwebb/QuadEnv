@@ -43,7 +43,7 @@ void InitIO()
 
 	GPIOC->MODER &= ~GPIO_MODER_MODE13;			// configure PC13 gate 1 input
 
-	GPIOA->MODER &= ~GPIO_MODER_MODE5_1;		//Configure PA5 as LED output
+	GPIOA->MODER &= ~GPIO_MODER_MODE5_1;		// Configure PA5 as LED output
 
 //	GPIOB->MODER &= ~GPIO_MODER_MODER5;				// configure PB5  Env 1 Short input
 
