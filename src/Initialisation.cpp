@@ -56,7 +56,7 @@ void InitPWMTimer()
 	// TIM3: Channel 1: *PA6 (AF1), PB4 (AF1), PB8 (AF3), PB6 (AF12), PB7 (AF11), PC6 (AF1)
 	// 		 Channel 2: *PA7 (AF1), PB3 (AF3), PB5 (AF1), PB9 (AF3), PB6 (AF13), PC7 (AF1), PC14 (AF11)
 	// 		 Channel 3: *PA8 (AF11), PB0 (AF1), PB5 (AF3), PB6 (AF3), PC15 (AF3)
-	// 		 Channel 4: PA8 (AF12), PB1 (AF1), *PB7 (AF3), PB6 (AF3), PC15 (AF3)
+	// 		 Channel 4: PA8 (AF12), PB1 (AF1), PB7 (AF3), PB6 (AF3), *PC15 (AF3)
 	RCC->IOPENR |= RCC_IOPENR_GPIOAEN;
 	RCC->IOPENR |= RCC_IOPENR_GPIOBEN;
 	RCC->APBENR1 |= RCC_APBENR1_TIM3EN;
@@ -66,9 +66,9 @@ void InitPWMTimer()
 	GPIOA->AFR[0] |= (GPIO_AFRL_AFSEL6_0 | GPIO_AFRL_AFSEL7_0);		// AF1
 	GPIOA->AFR[1] |= 11 << GPIO_AFRH_AFSEL8_Pos;					// AF11
 
-	// Enable channel 4 PWM output pin on PB7
-	GPIOB->MODER &= ~GPIO_MODER_MODE7_0;
-	GPIOB->AFR[0] |= 3 << GPIO_AFRL_AFSEL7_Pos;						// AF3
+	// Enable channel 4 PWM output pin on PC15
+	GPIOC->MODER &= ~GPIO_MODER_MODE15_0;
+	GPIOC->AFR[1] |= 3 << GPIO_AFRH_AFSEL15_Pos;						// AF3
 
 	// Timing calculations: Clock = 64MHz / (PSC + 1) = 32m counts per second
 	// ARR = number of counts per PWM tick = 4096

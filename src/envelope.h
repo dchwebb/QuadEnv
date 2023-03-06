@@ -59,7 +59,7 @@ private:
 			{&(TIM3->CCR3), GPIOC, 13, GPIOB,  5},		// PA6 Env1
 			{&(TIM3->CCR2), GPIOB, 14, GPIOB,  3},		// PA7 Env2
 			{&(TIM3->CCR1), GPIOB, 15, GPIOC, 10},		// PA8 Env3
-			{&(TIM3->CCR4), GPIOC,  6, GPIOB, 12} 		// PB7 Env4
+			{&(TIM3->CCR4), GPIOC,  6, GPIOB, 12} 		// PC15 Env4
 	};
 };
 
