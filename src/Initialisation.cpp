@@ -68,7 +68,7 @@ void InitPWMTimer()
 
 	// Enable channel 4 PWM output pin on PC15
 	GPIOC->MODER &= ~GPIO_MODER_MODE15_0;
-	GPIOC->AFR[1] |= 3 << GPIO_AFRH_AFSEL15_Pos;						// AF3
+	GPIOC->AFR[1] |= 3 << GPIO_AFRH_AFSEL15_Pos;					// AF3
 
 	// Timing calculations: Clock = 64MHz / (PSC + 1) = 32m counts per second
 	// ARR = number of counts per PWM tick = 4096
@@ -83,13 +83,13 @@ void InitPWMTimer()
 	TIM3->CCMR2 |= (TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2);	// 0110: PWM mode 1 - In upcounting, channel 3 active if TIMx_CNT<TIMx_CCR3
 	TIM3->CCMR2 |= (TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2);	// 0110: PWM mode 1 - In upcounting, channel 3 active if TIMx_CNT<TIMx_CCR3
 
-	TIM3->CCR1 = 0x800;								// Initialise PWM level to midpoint (PWM level set in ble_hid.cpp)
-	TIM3->CCR2 = 0x800;
-	TIM3->CCR3 = 0x800;
-	TIM3->CCR4 = 0x800;
+	TIM3->CCR1 = 0;									// Initialise PWM level to 0
+	TIM3->CCR2 = 0;
+	TIM3->CCR3 = 0;
+	TIM3->CCR4 = 0;
 
-	TIM3->ARR = 0xFFF;								// Total number of PWM ticks = 4096
-	TIM3->PSC = 0;									// Should give ~11.7kHz
+	TIM3->ARR = pwmLength - 1;								// Total number of PWM ticks = 512
+	TIM3->PSC = 0;									// Should give ~93.7kHz
 	TIM3->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
 	TIM3->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E);		// Capture mode enabled / OC1 signal is output on the corresponding output pin
 	TIM3->EGR |= TIM_EGR_UG;						// 1: Re-initialize the counter and generates an update of the registers

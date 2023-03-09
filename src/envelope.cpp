@@ -26,7 +26,8 @@ void Envelope::calcEnvelope()
 
 		longADSR = (shortPort->IDR & (1 << shortPin)) != 0;
 
-		sustain = 2048;		//ADC_array.sustain;
+		sustain = pwmLength / 2;		//ADC_array.sustain;
+		static constexpr uint32_t maxLevel = static_cast<uint32_t>(1.2f * pwmLength);		// Target amplitude of attack phase
 
 		switch (gateState) {
 		case gateStates::off:
@@ -40,10 +41,10 @@ void Envelope::calcEnvelope()
 		case gateStates::attack: {
 
 			//ADC_array.attack
-			currentLevel = 5000.0f - static_cast<float>(5000 - currentLevel) * 0.999f;
+			currentLevel = static_cast<float>(maxLevel) - static_cast<float>(maxLevel - currentLevel) * 0.999f;
 
-			if (currentLevel >= 4095.0f) {
-				currentLevel = 4095.0f;
+			if (currentLevel >= (float)(pwmLength - 1)) {
+				currentLevel = pwmLength - 1;
 				gateState = gateStates::decay;
 			}
 

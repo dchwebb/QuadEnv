@@ -1,6 +1,7 @@
 Debug/
 Hardware/QuadEnv_Components-backups/
-
+Hardware_STM32C031/QuadEnv_Components-backups/
+Hardware_STM32G431/QuadEnv_Components-backups/
 
 # Prerequisites
 *.d
@@ -36,10 +37,6 @@ Hardware/QuadEnv_Components-backups/
 *.app
 
 Hardware/#auto_saved_files#
-Hardware/_autosave-Ball_Base_Components.kicad_sch
-remote_hardware/_autosave-Ball_Remote_Components.kicad_pcb
-
-
-
-
 Hardware/_autosave-QuadEnv_Components.kicad_sch
+
+

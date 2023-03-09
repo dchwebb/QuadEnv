@@ -8,6 +8,8 @@ extern volatile uint32_t SysTickVal;
 #define SAMPLERATE 48000.0f
 #define ADC_BUFFER_LENGTH 4
 
+static constexpr uint32_t pwmLength = 512;
+
 //#define DEBUG_ON  GPIOB->ODR |= GPIO_ODR_OD9;
 //#define DEBUG_OFF GPIOB->ODR &= ~GPIO_ODR_OD9;
 

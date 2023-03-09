@@ -28,8 +28,9 @@ int main(void)
 	while (1) {
 		if ((GPIOC->IDR & GPIO_IDR_ID13) == 0 && SysTickVal > buttonDebounce + 1000) {
 			buttonDebounce = SysTickVal;
-			uartSendString("Test\r\n");
+			//uartSendString("Test\r\n");
 		}
+		uartCommand();
 	}
 }
 

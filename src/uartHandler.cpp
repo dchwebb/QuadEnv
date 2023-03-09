@@ -1,8 +1,11 @@
 #include "uartHandler.h"
+#include <string>
 
-volatile uint8_t uartCmdPos = 0;
-volatile char uartCmd[100];
-volatile bool uartCmdRdy = false;
+uint8_t uartCmdPos = 0;
+char uartCmd[100];
+bool uartCmdRdy = false;
+
+bool toggleSaw = false;
 
 // Manages communication to ST Link debugger UART1 on PA2 (TX), PA3 (RX) [PB6 (TX) and PB7 (RX) not connected]
 void InitUart() {
@@ -76,20 +79,50 @@ void uartSendString(const char* s) {
 	}
 }
 
-void uartSendString(const std::string& s) {
+void uartSendString(const std::string_view& s) {
 	for (char c : s) {
 		while ((USART2->ISR & USART_ISR_TXE_TXFNF) == 0);
 		USART2->TDR = c;
 	}
 }
 
-extern "C" {
 
+
+// Check if a command has been received from USB, parse and action as required
+void uartCommand()
+{
+	char buf[50];
+
+	if (!uartCmdRdy) {
+		return;
+	}
+
+	std::string_view cmd {uartCmd};
+
+	if (cmd.compare("help\n") == 0) {
+
+		uartSendString("Mountjoy Quad Envelope\r\n"
+				"\r\nSupported commands:\r\n"
+				"info        -  Show diagnostic information\r\n"
+				"saw         -  Toggle Saw Test wave\r\n"
+				"\r\n");
+	} else if (cmd.compare("saw\n") == 0) {
+		toggleSaw = !toggleSaw;
+
+	} else {
+		printf("Unrecognised command: %s\r\nType 'help' for supported commands\r\n", cmd.data());
+	}
+	uartCmdRdy = false;
+}
+
+extern "C" {
 // USART Decoder
-void USART2_IRQHandler() {
+void USART2_IRQHandler()
+{
 	if (!uartCmdRdy) {
 		uartCmd[uartCmdPos] = USART2->RDR; 				// accessing RDR automatically resets the receive flag
 		if (uartCmd[uartCmdPos] == 10) {
+			uartCmd[uartCmdPos + 1] = 0;				// Ensure zero termination of string
 			uartCmdRdy = true;
 			uartCmdPos = 0;
 		} else {
