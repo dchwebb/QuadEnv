@@ -18,7 +18,7 @@
       "footprints": true,
       "graphics": true,
       "keepouts": true,
-      "lockedItems": false,
+      "lockedItems": true,
       "otherItems": true,
       "pads": true,
       "text": true,
@@ -62,11 +62,11 @@
       35,
       36
     ],
-    "visible_layers": "ffcffef_ffffffff",
+    "visible_layers": "ffcfeff_7ffffffe",
     "zone_display_mode": 1
   },
   "meta": {
-    "filename": "QuadEnv_Components.kicad_prl",
+    "filename": "QuadEnv_Controls.kicad_prl",
     "version": 3
   },
   "project": {
