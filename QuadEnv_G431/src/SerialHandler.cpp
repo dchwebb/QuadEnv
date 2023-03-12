@@ -65,12 +65,11 @@ bool SerialHandler::Command()
 
 	} else if (ComCmd.compare("info\n") == 0) {		// Print diagnostic information
 
-		usb->SendString("Mountjoy Ampelope v1.0 - Current Settings:\r\n\r\n"
-				"Envelope Times:" + std::string(envelopes.envelope[0].longADSR ? "long" : "short") + "\r\n");
+		usb->SendString("Mountjoy QuadEnv v1.0 - Current Settings:\r\n\r\n");
 
 	} else if (ComCmd.compare("help\n") == 0) {
 
-		usb->SendString("Mountjoy Ampelope\r\n"
+		usb->SendString("Mountjoy QuadEnv\r\n"
 				"\r\nSupported commands:\r\n"
 				"info        -  Show diagnostic information\r\n"
 				"l/s         -  Long or Short envelope times\r\n"
@@ -91,23 +90,6 @@ bool SerialHandler::Command()
 	} else if (ComCmd.compare("lfo\n") == 0) {				// LFO on/off
 //		envelope.tremolo = !envelope.tremolo;
 //		usb->SendString("LFO " + std::string(envelope.tremolo ? "on" : "off") + "\r\n");
-
-	} else if (ComCmd.compare("l\n") == 0) {				// Long envelope times
-		//envelope.longTimes = true;
-
-	} else if (ComCmd.compare("s\n") == 0) {				// Short envelope times
-		//envelope.longTimes = false;
-
-/*	} else if (ComCmd.compare(0, 9, "mdlength:") == 0) {		// Modulated Delay length
-		uint16_t val = ParseInt(ComCmd, ':', 1, 65535);
-		if (val > 0) {
-			delay.modOffsetMax = val;
-			delay.modOffset[left] = delay.modOffsetMax / 2;
-			delay.modOffset[right] = delay.modOffsetMax / 2;
-			config.SaveConfig();
-		}
-		usb->SendString("Modulated delay length set to: " + std::to_string(delay.modOffsetMax) + "\r\n");
-*/
 
 	} else {
 		usb->SendString("Unrecognised command: " + ComCmd + "Type 'help' for supported commands\r\n");

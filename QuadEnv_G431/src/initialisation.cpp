@@ -217,15 +217,9 @@ void InitADC(volatile uint16_t* ADC_array)
 	2	PC2 ADC12_IN8		Env1 Sustain
 	3	PC3 ADC12_IN9		Env1 Release
 
-	4	PA0 ADC12_IN1		Env2 Attack
-	5	PA1 ADC12_IN2		Env2 Decay
-	6	PA3 ADC1_IN4		Env2 Sustain
-	7	PB0 ADC1_IN15		Env2 Release
-
-	8	PB11 ADC12_IN14		LFO Speed
 	*/
 
-	InitAdcPins(ADC1, {6, 7, 8, 9, 1, 2, 4, 15, 14});
+	InitAdcPins(ADC1, {6, 7, 8, 9});
 
 
 	// Enable ADC
@@ -277,5 +271,59 @@ void InitDebounceTimer() {
 
 */
 
+
+void InitPWMTimer()
+{
+	// TIM3: Channel 1: PA0 (AF1)
+	// 		 Channel 2: PB3 (AF1)
+	// 		 Channel 3: PB10 (AF1)
+	// 		 Channel 4: PB11 (AF1)
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;			// reset and clock control - advanced high performance bus - GPIO port A
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;			// reset and clock control - advanced high performance bus - GPIO port B
+	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;
+
+	// Enable channel 1, 2, 3 PWM output pins on PA0
+	// 00: Input mode; 01: General purpose output mode; 10: Alternate function mode; 11: Analog mode (default)
+	GPIOA->MODER &= ~GPIO_MODER_MODE0_0;
+	GPIOA->AFR[0] |= GPIO_AFRL_AFSEL0_0;			// AF1
+
+
+	// Enable channel 4 PWM output pin on PB3, PB10, PB11
+	GPIOB->MODER &= ~(GPIO_MODER_MODE3_0 | GPIO_MODER_MODE10_0 | GPIO_MODER_MODE11_0);
+	GPIOB->AFR[0] |= GPIO_AFRL_AFSEL3_0;			// AF1
+	GPIOB->AFR[1] |= (GPIO_AFRH_AFSEL10_0 | GPIO_AFRH_AFSEL11_0);					// AF1
+
+
+	// Timing calculations: Clock = 64MHz / (PSC + 1) = 32m counts per second
+	// ARR = number of counts per PWM tick = 4096
+	// 32m / ARR = 7.812kHz of PWM square wave with 4096 levels of output
+	TIM2->CCMR1 |= TIM_CCMR1_OC1PE;					// Output compare 1 preload enable
+	TIM2->CCMR1 |= TIM_CCMR1_OC2PE;					// Output compare 2 preload enable
+	TIM2->CCMR2 |= TIM_CCMR2_OC3PE;					// Output compare 3 preload enable
+	TIM2->CCMR2 |= TIM_CCMR2_OC4PE;					// Output compare 4 preload enable
+
+	TIM2->CCMR1 |= (TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2);	// 0110: PWM mode 1 - In upcounting, channel 1 active if TIMx_CNT<TIMx_CCR1
+	TIM2->CCMR1 |= (TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2);	// 0110: PWM mode 1 - In upcounting, channel 2 active if TIMx_CNT<TIMx_CCR2
+	TIM2->CCMR2 |= (TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2);	// 0110: PWM mode 1 - In upcounting, channel 3 active if TIMx_CNT<TIMx_CCR3
+	TIM2->CCMR2 |= (TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2);	// 0110: PWM mode 1 - In upcounting, channel 3 active if TIMx_CNT<TIMx_CCR3
+
+	TIM2->CCR1 = 0;									// Initialise PWM level to 0
+	TIM2->CCR2 = 0;
+	TIM2->CCR3 = 0;
+	TIM2->CCR4 = 0;
+
+	TIM2->ARR = 2047;								// Total number of PWM ticks = 512
+	TIM2->PSC = 0;									// Should give ~93.7kHz
+	TIM2->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
+	TIM2->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E);		// Capture mode enabled / OC1 signal is output on the corresponding output pin
+	TIM2->EGR |= TIM_EGR_UG;						// 1: Re-initialize the counter and generates an update of the registers
+
+	// Generate interrupt on Update
+//	TIM2->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
+//	NVIC_EnableIRQ(TIM2_IRQn);
+//	NVIC_SetPriority(TIM2_IRQn, 0);					// Lower is higher priority
+
+	TIM2->CR1 |= TIM_CR1_CEN;						// Enable counter
+}
 
 

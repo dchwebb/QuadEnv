@@ -7,10 +7,9 @@
 // FIXME - add transistor to start VCA in off position
 
 volatile uint32_t SysTickVal;
-volatile ADCValues ADC_array;
+volatile ADSR ADC_array;
 
 uint32_t buttonDebounce;
-Envelopes envelopes;
 USBHandler usb;
 SerialHandler serial(usb);
 
@@ -30,8 +29,9 @@ int main(void)
 	InitIO();
 	InitEnvTimer();
 	InitADC(reinterpret_cast<volatile uint16_t*>(&ADC_array));
-	InitUart();
-	InitCordic();
+//	InitUart();
+//	InitCordic();
+	InitPWMTimer();
 
 	usb.InitUSB();
 

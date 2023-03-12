@@ -1,4 +1,4 @@
-20985048298009811
+20991793377841606
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -50659,6 +50659,13 @@ RJ45 PJ012
 8
 8
 Custom_Footprints
+RJ45_Amphenol_RJHSE-3080_Mounting_Hole
+RJ45 vertical connector https://www.on-shore.com/wp-content/uploads/PJ012-8P8CX.pdf
+RJ45 PJ012
+0
+0
+0
+Custom_Footprints
 RJ45_Molex_42878-8506
 RJ45 vertical connector https://www.on-shore.com/wp-content/uploads/PJ012-8P8CX.pdf
 RJ45 PJ012
@@ -53822,6 +53829,27 @@ Fuse Fuseholder TR5 Littelfuse/Wickmann No. 460 No560
 0
 2
 2
+Graphics
+Env_logo
+
+
+0
+0
+0
+Graphics
+Q_logo
+
+
+0
+0
+0
+Graphics
+Quad_logo
+
+
+0
+0
+0
 Heatsink
 Heatsink_35x26mm_1xFixation3mm_Fischer-SK486-35
 Heatsink, 35mm x 26mm, 1x Fixation 3mm, Fischer SK486-35
