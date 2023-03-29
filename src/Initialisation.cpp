@@ -88,7 +88,7 @@ void InitPWMTimer()
 	TIM3->CCR3 = 0;
 	TIM3->CCR4 = 0;
 
-	TIM3->ARR = pwmLength - 1;								// Total number of PWM ticks = 512
+	TIM3->ARR = pwmLength - 1;						// Total number of PWM ticks = 512
 	TIM3->PSC = 0;									// Should give ~93.7kHz
 	TIM3->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
 	TIM3->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E);		// Capture mode enabled / OC1 signal is output on the corresponding output pin

@@ -5,7 +5,7 @@
       "Application": "Pcbnew",
       "Version": "(6.0.11)"
     },
-    "CreationDate": "2023-03-11T14:34:30+00:00"
+    "CreationDate": "2023-03-29T15:24:13+01:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
@@ -40,16 +40,6 @@
     {
       "Path": "QuadEnv_Panel-B_Cu.gbr",
       "FileFunction": "Copper,L2,Bot",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "QuadEnv_Panel-F_Paste.gbr",
-      "FileFunction": "SolderPaste,Top",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "QuadEnv_Panel-B_Paste.gbr",
-      "FileFunction": "SolderPaste,Bot",
       "FilePolarity": "Positive"
     },
     {
