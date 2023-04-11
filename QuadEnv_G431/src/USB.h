@@ -57,8 +57,8 @@ public:
 
 private:
 	static constexpr const char* manufacturerString = "Mountjoy Modular";
-	static constexpr const char* productString      = "Mountjoy Ampelope";
-	static constexpr const char* cdcString          = "Mountjoy Ampelope CDC";
+	static constexpr const char* productString      = "Mountjoy QuadEnv";
+	static constexpr const char* cdcString          = "Mountjoy QuadEnv CDC";
 
 	enum EndPoint {CDC_In = 0x81, CDC_Out = 0x1, CDC_Cmd = 0x82};
 	enum EndPointType {Control = 0, Isochronous = 1, Bulk = 2, Interrupt = 3};

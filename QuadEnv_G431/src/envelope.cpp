@@ -17,7 +17,6 @@ void Envelope::calcEnvelope()
 	if ((gatePort->IDR & (1 << gatePin)) != 0) {
 
 		sustain = ADC_array.sustain;
-		static constexpr uint32_t maxLevel = static_cast<uint32_t>(1.2f * pwmLength);		// Target amplitude of attack phase
 
 		switch (gateState) {
 		case gateStates::off:
@@ -30,10 +29,20 @@ void Envelope::calcEnvelope()
 
 		case gateStates::attack: {
 
-			//ADC_array.attack
-			currentLevel = static_cast<float>(maxLevel) - static_cast<float>(maxLevel - currentLevel) * 0.999f;
+			//attack = std::round(((attack * 31.0f) + static_cast<float>(ADC_array.attack)) / 32.0f);
 
-			if (currentLevel >= 4096.0f) {
+			// fullRange = value of fully charged capacitor; comparitor value is 4096 where cap is charged enough to trigger decay phase
+			const float fullRange = 5000.0f;
+
+			// scales attack pot to allow more range at low end of pot, exponentially longer times at upper end
+			const float maxDurationMult = 0.9f / 1.73f;		// 1.73 allows duration to be set in seconds
+
+			// RC value - attackScale represents R component; maxDurationMult represents capacitor size (Reduce rc for a steeper curve)
+			float rc = 0.80f + sqrt(ADC_array.attack / 4096.f) * 0.20f;		// Using a^3 for fast approximation for measured charging rate (^2.9)
+
+			currentLevel = fullRange - (fullRange - currentLevel) * rc;
+
+			if (currentLevel >= 4095.0f) {
 				currentLevel = 4095.0f;
 				gateState = gateStates::decay;
 			}
