@@ -31,7 +31,7 @@ int main(void)
 	InitADC(reinterpret_cast<volatile uint16_t*>(&ADC_array));
 //	InitUart();
 //	InitCordic();
-	InitPWMTimer();
+//	InitPWMTimer();
 
 	usb.InitUSB();
 

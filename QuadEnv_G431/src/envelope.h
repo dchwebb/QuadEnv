@@ -55,10 +55,10 @@ private:
 	bool     clockHigh;						// Record clock high state to detect clock transitions
 
 	Envelope envelope[4] = {
-			{&(DAC1->DHR12R1), GPIOC, 13},		// PA4 Env1
-			{&(DAC1->DHR12R2), GPIOB, 14},		// PA5 Env2
-			{&(DAC3->DHR12R2), GPIOB, 15},		// PB1 Env3
-			{&(DAC3->DHR12R1), GPIOC,  6} 		// PA2 Env4
+			{&(DAC1->DHR12R1), GPIOB, 6},		// PA4 Env1
+			{&(DAC1->DHR12R2), GPIOB, 5},		// PA5 Env2
+			{&(DAC3->DHR12R2), GPIOB, 4},		// PB1 Env3
+			{&(DAC3->DHR12R1), GPIOB, 3} 		// PA2 Env4
 	};
 
 

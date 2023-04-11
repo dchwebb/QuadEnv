@@ -303,7 +303,7 @@ void USBHandler::InitUSB()
 void USBHandler::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype, uint16_t pmaAddress)
 {
 	endpoint = endpoint & 0xF;
-	uint16_t ep_type;
+	uint16_t ep_type = 0;
 	switch (eptype) {
 		case Control:		ep_type = USB_EP_CONTROL;		break;
 		case Isochronous:	ep_type = USB_EP_ISOCHRONOUS;	break;

@@ -5,17 +5,9 @@ Envelopes envelopes;
 
 void Envelopes::calcEnvelopes()
 {
-//	DEBUG_ON
-	if (++TIM2->CCR1 > 2047) {
-		TIM2->CCR1 = 0;
+	for (Envelope& env : envelope) {
+		env.calcEnvelope();
 	}
-	envelope[0].calcEnvelope();
-
-//	for (Envelope& env : envelope) {
-//		env.calcEnvelope();
-//	}
-
-//	DEBUG_OFF
 }
 
 
@@ -24,9 +16,7 @@ void Envelope::calcEnvelope()
 	// Gate on
 	if ((gatePort->IDR & (1 << gatePin)) != 0) {
 
-		GPIOA->ODR |= GPIO_ODR_OD5;
-
-		sustain = pwmLength / 2;		//ADC_array.sustain;
+		sustain = ADC_array.sustain;
 		static constexpr uint32_t maxLevel = static_cast<uint32_t>(1.2f * pwmLength);		// Target amplitude of attack phase
 
 		switch (gateState) {
@@ -43,8 +33,8 @@ void Envelope::calcEnvelope()
 			//ADC_array.attack
 			currentLevel = static_cast<float>(maxLevel) - static_cast<float>(maxLevel - currentLevel) * 0.999f;
 
-			if (currentLevel >= (float)(pwmLength - 1)) {
-				currentLevel = pwmLength - 1;
+			if (currentLevel >= 4096.0f) {
+				currentLevel = 4095.0f;
 				gateState = gateStates::decay;
 			}
 
@@ -85,10 +75,8 @@ void Envelope::calcEnvelope()
 
 		} else {
 			gateState = gateStates::off;
-			GPIOA->ODR &= ~GPIO_ODR_OD5;
 		}
 	}
 
 	*outputChn = static_cast<uint32_t>(currentLevel);
-
 }

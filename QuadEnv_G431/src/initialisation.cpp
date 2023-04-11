@@ -91,41 +91,22 @@ void InitIO()
 
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;			// reset and clock control - advanced high performance bus - GPIO port A
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;			// reset and clock control - advanced high performance bus - GPIO port B
-	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;			// reset and clock control - advanced high performance bus - GPIO port C
-
-	GPIOB->MODER &= ~GPIO_MODER_MODER13;			// configure PB13 gate 1 input
-	GPIOB->MODER &= ~GPIO_MODER_MODER14;			// configure PB14 gate 2 input
-	GPIOB->MODER &= ~GPIO_MODER_MODER15;			// configure PB15 gate 3 input
-	GPIOC->MODER &= ~GPIO_MODER_MODER6;				// configure PC6  gate 4 input
 
 	// NB PB6 is used in USB Power delivery and by default has a pull down to ground - disable in the PWR register (datasheet p.60 note 5)
 	PWR->CR3 |= PWR_CR3_UCPD_DBDIS;
 
-	GPIOB->MODER &= ~GPIO_MODER_MODER5;				// configure PB5  Env 1 Short input
-	GPIOB->MODER &= ~GPIO_MODER_MODER6;				// configure PB6  Env 1 tremolo input*
-	GPIOB->MODER &= ~GPIO_MODER_MODER3;				// configure PB3  Env 2 Short input
-	GPIOB->MODER &= ~GPIO_MODER_MODER4;				// configure PB4  Env 2 tremolo input
-	GPIOC->MODER &= ~GPIO_MODER_MODER10;			// configure PC10 Env 3 Short input
-	GPIOC->MODER &= ~GPIO_MODER_MODER12;			// configure PC12 Env 3 tremolo input
-	GPIOB->MODER &= ~GPIO_MODER_MODER12;			// configure PB12 Env 4 Short input
-	GPIOA->MODER &= ~GPIO_MODER_MODER15;			// configure PA15 Env 4 tremolo input
+	GPIOB->MODER &= ~GPIO_MODER_MODER6;				// configure PB6 gate 1 input
+	GPIOB->MODER &= ~GPIO_MODER_MODER5;				// configure PB5 gate 2 input
+	GPIOB->MODER &= ~GPIO_MODER_MODER4;				// configure PB4 gate 3 input
+	GPIOB->MODER &= ~GPIO_MODER_MODER3;				// configure PB3 gate 4 input
 
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR5_0;			// configure PB5  Env 1 Pull-up
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR6_0;			// configure PB6  Env 1 Pull-up
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR3_0;			// configure PB3  Env 2 Pull-up
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR4_0;			// configure PB4  Env 2 Pull-up
-	GPIOC->PUPDR |= GPIO_PUPDR_PUPDR10_0;			// configure PC10 Env 3 Pull-up
-	GPIOC->PUPDR |= GPIO_PUPDR_PUPDR12_0;			// configure PC12 Env 3 Pull-up
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR12_0;			// configure PB12 Env 4 Pull-up
-	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR15_0;			// configure PA15 Env 4 Pull-up
 
-	GPIOA->MODER &= ~GPIO_MODER_MODER9;				// configure PA9 clock input
-	GPIOB->MODER &= ~GPIO_MODER_MODER9_1;			// configure PB9 debug out
 }
 
 
 //	Setup Timer 3 on an interrupt to trigger sample output
-void InitEnvTimer() {
+void InitEnvTimer()
+{
 	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM3EN;			// Enable Timer 3
 	TIM3->PSC = 34;									// Set prescaler
 	TIM3->ARR = 103; 								// Set auto reload register - 170Mhz / 33 / 103 = ~50kHz
@@ -139,7 +120,8 @@ void InitEnvTimer() {
 }
 
 
-void InitAdcPins(ADC_TypeDef* ADC_No, std::initializer_list<uint8_t> channels) {
+void InitAdcPins(ADC_TypeDef* ADC_No, std::initializer_list<uint8_t> channels)
+{
 	uint8_t sequence = 1;
 
 	for (auto channel: channels) {
@@ -212,15 +194,13 @@ void InitADC(volatile uint16_t* ADC_array)
 
 	/*--------------------------------------------------------------------------------------------
 	Configure ADC Channels to be converted:
-	0	PC0 ADC12_IN6		Env1 Attack
-	1	PC1 ADC12_IN7		Env1 Decay
-	2	PC2 ADC12_IN8		Env1 Sustain
-	3	PC3 ADC12_IN9		Env1 Release
-
+	0	PA0 ADC12_IN1		Env Attack
+	1	PA1 ADC12_IN2		Env Decay
+	2	PB0 ADC1_IN15		Env Sustain
+	3	PA3 ADC1_IN4		Env Release
 	*/
 
-	InitAdcPins(ADC1, {6, 7, 8, 9});
-
+	InitAdcPins(ADC1, {1, 2, 15, 4});
 
 	// Enable ADC
 	ADC1->CR |= ADC_CR_ADEN;
