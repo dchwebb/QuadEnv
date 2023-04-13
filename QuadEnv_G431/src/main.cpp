@@ -1,15 +1,13 @@
 #include "initialisation.h"
 #include "envelope.h"
 #include "usb.h"
-#include "uartHandler.h"
+#include "configManager.h"
 #include "SerialHandler.h"
 #include <cmath>
-// FIXME - add transistor to start VCA in off position
 
 volatile uint32_t SysTickVal;
-volatile ADSR ADC_array;
+volatile ADSR adsr;
 
-uint32_t buttonDebounce;
 USBHandler usb;
 SerialHandler serial(usb);
 
@@ -28,21 +26,13 @@ int main(void)
 	InitDAC();
 	InitIO();
 	InitEnvTimer();
-	InitADC(reinterpret_cast<volatile uint16_t*>(&ADC_array));
-//	InitUart();
-//	InitCordic();
-//	InitPWMTimer();
-
+	InitADC(reinterpret_cast<volatile uint16_t*>(&adsr));
+	InitCordic();
+	configManager.RestoreConfig();
 	usb.InitUSB();
 
 	while (1) {
-		if ((GPIOC->IDR & GPIO_IDR_ID13) != 0 && SysTickVal > buttonDebounce + 1000) {
-			buttonDebounce = SysTickVal;
-#if (USB_DEBUG)
-			usb.OutputDebug();
-#endif
-		}
-		serial.Command();			// Check for incoming CDC commands
+		serial.Command();					// Check for incoming CDC commands
 	}
 }
 

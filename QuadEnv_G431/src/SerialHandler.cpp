@@ -1,10 +1,93 @@
 #include "SerialHandler.h"
 #include "Envelope.h"
+#include "configManager.h"
 
 #include <stdio.h>
-#include <cmath>		// for cordic test
+#include <cmath>
 
-extern Envelopes envelopes;
+
+SerialHandler::SerialHandler(USBHandler& usbObj)
+{
+	usb = &usbObj;
+
+	// bind the usb's CDC caller to the CDC handler in this class
+	usb->cdcDataHandler = std::bind(&SerialHandler::Handler, this, std::placeholders::_1, std::placeholders::_2);
+}
+
+
+
+// Check if a command has been received from USB, parse and action as required
+bool SerialHandler::Command()
+{
+	char buf[50];
+
+	if (!cmdPending) {
+		return false;
+	}
+
+	if (cmd.compare("info\n") == 0) {		// Print diagnostic information
+
+		usb->SendString("Mountjoy QuadEnv v1.0 - Current Settings:\r\n\r\n");
+
+		// Use manual float conversion as printf with float support uses more space than we have
+		uint32_t fltIntPart = std::round(envelopes.config.durationMult);
+		uint32_t fltFrcPart = std::round((envelopes.config.durationMult - fltIntPart) * 100);
+		sprintf(buf, "Envelope multiplier: %ld.%ld\r\n", fltIntPart, fltFrcPart);
+		usb->SendString(buf);
+
+	} else if (cmd.compare("help\n") == 0) {
+
+		usb->SendString("Mountjoy QuadEnv\r\n"
+				"\r\nSupported commands:\r\n"
+				"info        -  Show diagnostic information\r\n"
+				"mult:xx.x   -  Set duration multiplier (eg 1.0 for short, 8.5 for long)\r\n"
+				"\r\n"
+#if (USB_DEBUG)
+				"usbdebug    -  Start USB debugging\r\n"
+				"\r\n"
+#endif
+		);
+
+#if (USB_DEBUG)
+	} else if (cmd.compare("usbdebug\n") == 0) {				// Configure gate LED
+		USBDebug = true;
+		usb->SendString("Press link button to dump output\r\n");
+#endif
+
+	} else if (cmd.compare(0, 5, "mult:") == 0) {		// Set envelope duration multiplier
+		const float mult = ParseFloat(cmd, ':', 0.1f, 99.9f);
+		if (mult >= 0.0f) {
+			envelopes.config.durationMult = mult;
+			configManager.SaveConfig();
+		}
+
+	} else {
+		usb->SendString("Unrecognised command: " + cmd + "Type 'help' for supported commands\r\n");
+	}
+
+	cmdPending = false;
+	return true;
+}
+
+
+void SerialHandler::Handler(uint8_t* data, uint32_t length)
+{
+	static bool newCmd = true;
+	if (newCmd) {
+		cmd = std::string(reinterpret_cast<char*>(data), length);
+		newCmd = false;
+	} else {
+		cmd.append(reinterpret_cast<char*>(data), length);
+	}
+	if (*cmd.rbegin() == '\r')
+		*cmd.rbegin() = '\n';
+
+	if (*cmd.rbegin() == '\n') {
+		cmdPending = true;
+		newCmd = true;
+	}
+
+}
 
 int32_t SerialHandler::ParseInt(const std::string cmd, const char precedingChar, int low = 0, int high = 0) {
 	int32_t val = -1;
@@ -31,91 +114,3 @@ float SerialHandler::ParseFloat(const std::string cmd, const char precedingChar,
 	}
 	return val;
 }
-
-SerialHandler::SerialHandler(USBHandler& usbObj)
-{
-	usb = &usbObj;
-
-	// bind the usb's CDC caller to the CDC handler in this class
-	usb->cdcDataHandler = std::bind(&SerialHandler::Handler, this, std::placeholders::_1, std::placeholders::_2);
-}
-
-
-
-// Check if a command has been received from USB, parse and action as required
-bool SerialHandler::Command()
-{
-	char buf[50];
-
-	if (!CmdPending) {
-		return false;
-	}
-
-	// Provide option to switch to USB DFU mode - this allows the MCU to be programmed with STM32CubeProgrammer in DFU mode
-	if (state == serialState::dfuConfirm) {
-		if (ComCmd.compare("y\n") == 0 || ComCmd.compare("Y\n") == 0) {
-			usb->SendString("Switching to DFU Mode ...\r\n");
-			uint32_t old = SysTickVal;
-			while (SysTickVal < old + 100) {};		// Give enough time to send the message
-			//bootloader.BootDFU();
-		} else {
-			state = serialState::pending;
-			usb->SendString("Upgrade cancelled\r\n");
-		}
-
-	} else if (ComCmd.compare("info\n") == 0) {		// Print diagnostic information
-
-		usb->SendString("Mountjoy QuadEnv v1.0 - Current Settings:\r\n\r\n");
-
-	} else if (ComCmd.compare("help\n") == 0) {
-
-		usb->SendString("Mountjoy QuadEnv\r\n"
-				"\r\nSupported commands:\r\n"
-				"info        -  Show diagnostic information\r\n"
-				"l/s         -  Long or Short envelope times\r\n"
-				"lfo         -  Tremolo LFO on/off\r\n"
-				"\r\n"
-#if (USB_DEBUG)
-				"usbdebug    -  Start USB debugging\r\n"
-				"\r\n"
-#endif
-		);
-
-#if (USB_DEBUG)
-	} else if (ComCmd.compare("usbdebug\n") == 0) {				// Configure gate LED
-		USBDebug = true;
-		usb->SendString("Press link button to dump output\r\n");
-#endif
-
-	} else if (ComCmd.compare("lfo\n") == 0) {				// LFO on/off
-//		envelope.tremolo = !envelope.tremolo;
-//		usb->SendString("LFO " + std::string(envelope.tremolo ? "on" : "off") + "\r\n");
-
-	} else {
-		usb->SendString("Unrecognised command: " + ComCmd + "Type 'help' for supported commands\r\n");
-	}
-
-	CmdPending = false;
-	return true;
-}
-
-
-void SerialHandler::Handler(uint8_t* data, uint32_t length)
-{
-	static bool newCmd = true;
-	if (newCmd) {
-		ComCmd = std::string(reinterpret_cast<char*>(data), length);
-		newCmd = false;
-	} else {
-		ComCmd.append(reinterpret_cast<char*>(data), length);
-	}
-	if (*ComCmd.rbegin() == '\r')
-		*ComCmd.rbegin() = '\n';
-
-	if (*ComCmd.rbegin() == '\n') {
-		CmdPending = true;
-		newCmd = true;
-	}
-
-}
-

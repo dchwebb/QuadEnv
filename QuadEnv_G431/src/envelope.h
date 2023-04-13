@@ -12,24 +12,24 @@ struct ADSR {
 
 
 
-extern volatile ADSR ADC_array;
+extern volatile ADSR adsr;
 
 struct Envelope {
 public:
 	Envelope(volatile uint32_t* outputChn, GPIO_TypeDef* gatePort, uint8_t gatePin)
 	 : outputChn{outputChn}, gatePort{gatePort}, gatePin{gatePin} {}
 
-	void calcEnvelope();						// Sets the DAC level for envelope
+	void calcEnvelope();							// Sets the DAC level for envelope
 
 private:
+	float CordicExp(float x);
+
 	const float     timeStep = 1.0f / SAMPLERATE;	// one time unit - corresponding to sample time
 
-	bool            longADSR = true;			// True if using long ADSR settings
-	float           attack = 800.0f;			// Store the ADSR values based on the pot values (mainly for debugging)
-	uint16_t        decay = 0;
+	bool            longADSR = false;				// True if using long ADSR settings
+	float           attack = 800.0f;				// Store the ADSR values based on the pot values (mainly for debugging)
 	float           sustain = 4095.0f;
-	uint16_t        release = 300;
-	float           currentLevel = 0.0f;		// The current level of the envelope (held as a float for accuracy of calulculation)
+	float           currentLevel = 0.0f;			// The current level of the envelope (held as a float for accuracy of calulculation)
 
 	enum class      gateStates {off, attack, decay, sustain, release};
 	gateStates      gateState = gateStates::off;
@@ -46,21 +46,20 @@ struct Envelopes {
 
 public:
 	void calcEnvelopes();					// Calls calculation on all contained envelopes
+	uint32_t SerialiseConfig(uint8_t** buff);
+	uint32_t StoreConfig(uint8_t* buff);
+
+	struct config_t {
+		float durationMult = 1.0f;
+	} config;
 
 private:
-	bool     clockValid;					// True if a clock pulse has been received within a second
-	uint32_t clockInterval;					// Clock interval in sample time
-	uint32_t clockCounter;					// Counter used to calculate clock times in sample time
-	uint32_t lastClock;						// Time last clock signal received in sample time
-	bool     clockHigh;						// Record clock high state to detect clock transitions
-
 	Envelope envelope[4] = {
 			{&(DAC1->DHR12R1), GPIOB, 6},		// PA4 Env1
 			{&(DAC1->DHR12R2), GPIOB, 5},		// PA5 Env2
 			{&(DAC3->DHR12R2), GPIOB, 4},		// PB1 Env3
 			{&(DAC3->DHR12R1), GPIOB, 3} 		// PA2 Env4
 	};
-
 
 };
 

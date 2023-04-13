@@ -14,12 +14,8 @@ private:
 	int32_t ParseInt(const std::string cmd, const char precedingChar, int low, int high);
 	float ParseFloat(const std::string cmd, const char precedingChar, float low, float high);
 
-	// State machine for multi-stage commands
-	enum class serialState {pending, dfuConfirm, calibConfirm, cancelAudioTest};
-	serialState state = serialState::pending;
-
-	bool CmdPending = false;
-	std::string ComCmd;
+	uint8_t cmdPending = false;
+	std::string cmd;
 	USBHandler* usb;
 };
 
