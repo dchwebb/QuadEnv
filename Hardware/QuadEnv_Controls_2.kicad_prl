@@ -1,6 +1,6 @@
 {
   "board": {
-    "active_layer": 38,
+    "active_layer": 31,
     "active_layer_preset": "",
     "auto_track_width": true,
     "hidden_netclasses": [],
@@ -14,7 +14,6 @@
       "vias": 1.0,
       "zones": 0.6
     },
-    "ratsnest_display_mode": 0,
     "selection_filter": {
       "dimensions": true,
       "footprints": true,
@@ -22,7 +21,7 @@
       "keepouts": true,
       "lockedItems": false,
       "otherItems": true,
-      "pads": false,
+      "pads": true,
       "text": true,
       "tracks": true,
       "vias": true,
@@ -41,7 +40,6 @@
       11,
       12,
       13,
-      14,
       15,
       16,
       17,
@@ -62,13 +60,14 @@
       33,
       34,
       35,
-      36
+      36,
+      40
     ],
-    "visible_layers": "ffdffff_ffffffff",
+    "visible_layers": "ffcfeff_ffffffff",
     "zone_display_mode": 1
   },
   "meta": {
-    "filename": "QuadEnv_Panel.kicad_prl",
+    "filename": "QuadEnv_Controls_2.kicad_prl",
     "version": 3
   },
   "project": {
