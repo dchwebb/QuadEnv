@@ -48,6 +48,7 @@ void InitSysTick()
 	NVIC_SetPriority(SysTick_IRQn, 0);
 }
 
+
 void InitDAC()
 {
 	// Configure 4 DAC outputs PA4 and PA5 are regular DAC1 buffered outputs; PA2 and PB1 are DAC3 via OpAmp1 and OpAmp3 (Manual p.789)
@@ -81,7 +82,6 @@ void InitDAC()
 	OPAMP3->CSR |= OPAMP_CSR_VMSEL;					// 11: Opamp_out connected to OPAMPx_VINM input
 	OPAMP3->CSR |= OPAMP_CSR_VPSEL;					// 11: DAC3_CH2  connected to OPAMP1 VINP input
 	OPAMP3->CSR |= OPAMP_CSR_OPAMPxEN;				// Enable OpAmp: voltage on pin OPAMPx_VINP is buffered to pin OPAMPx_VOUT (PB1)
-
 }
 
 
@@ -91,6 +91,8 @@ void InitIO()
 
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;			// reset and clock control - advanced high performance bus - GPIO port A
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;			// reset and clock control - advanced high performance bus - GPIO port B
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;			// Reset and clock control - GPIO port C
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOFEN;			// Reset and clock control - GPIO port F
 
 	// NB PB6 is used in USB Power delivery and by default has a pull down to ground - disable in the PWR register (datasheet p.60 note 5)
 	PWR->CR3 |= PWR_CR3_UCPD_DBDIS;
@@ -100,7 +102,10 @@ void InitIO()
 	GPIOB->MODER &= ~GPIO_MODER_MODER4;				// configure PB4 gate 3 input
 	GPIOB->MODER &= ~GPIO_MODER_MODER3;				// configure PB3 gate 4 input
 
+	GPIOF->MODER &= ~GPIO_MODER_MODER0;				// PF0 Fade-in Button input
+	GPIOF->PUPDR |= GPIO_PUPDR_PUPD0_0;				// 00: None; *01: Pull-up; 10: Pull-down
 
+	GPIOC->MODER &= ~GPIO_MODER_MODE13_1;			// PC13 LED Out
 }
 
 
@@ -138,11 +143,11 @@ void InitAdcPins(ADC_TypeDef* ADC_No, std::initializer_list<uint8_t> channels)
 		}
 
 		// 000: 3 cycles, 001: 15 cycles, 010: 28 cycles, 011: 56 cycles, 100: 84 cycles, 101: 112 cycles, 110: 144 cycles, 111: 480 cycles
-		if (channel < 10)
+		if (channel < 10) {
 			ADC_No->SMPR1 |= 0b010 << (3 * channel);
-		else
+		} else {
 			ADC_No->SMPR2 |= 0b010 << (3 * (channel - 10));
-
+		}
 		sequence++;
 	}
 }
@@ -258,7 +263,7 @@ void InitPWMTimer()
 	TIM3->CCMR1 |= (TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2);	// 0110: PWM mode 1 - In upcounting, channel 1 active if TIMx_CNT<TIMx_CCR1
 	TIM3->CCMR1 |= (TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2);	// 0110: PWM mode 1 - In upcounting, channel 2 active if TIMx_CNT<TIMx_CCR2
 	TIM2->CCMR2 |= (TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2);	// 0110: PWM mode 1 - In upcounting, channel 3 active if TIMx_CNT<TIMx_CCR3
-	TIM2->CCMR2 |= (TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2);	// 0110: PWM mode 1 - In upcounting, channel 3 active if TIMx_CNT<TIMx_CCR3
+	TIM2->CCMR2 |= (TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2);	// 0110: PWM mode 1 - In upcounting, channel 4 active if TIMx_CNT<TIMx_CCR3
 
 	TIM3->CCR1 = 0;									// Initialise PWM level to 0
 	TIM3->CCR2 = 0;
@@ -279,7 +284,6 @@ void InitPWMTimer()
 	TIM3->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
 	TIM3->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E);	// Capture mode enabled / OC1 signal is output on the corresponding output pin
 	TIM3->EGR |= TIM_EGR_UG;						// 1: Re-initialize the counter and generates an update of the registers
-
 
 	TIM2->CR1 |= TIM_CR1_CEN;						// Enable counter
 }

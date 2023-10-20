@@ -60,12 +60,17 @@ public:
 	} settings;
 
 private:
+	void CheckInvertBtn();
+
 	Envelope envelope[4] = {
 			{&(DAC1->DHR12R1), GPIOB, 6},		// PA4 Env1
 			{&(DAC1->DHR12R2), GPIOB, 5},		// PA5 Env2
 			{&(DAC3->DHR12R2), GPIOB, 4},		// PB1 Env3
 			{&(DAC3->DHR12R1), GPIOB, 3} 		// PA2 Env4
 	};
+
+	bool invertBtnDown = false;					// To manage debouncing
+	uint32_t invertBtnUp = 0;					// Store systick time button released for debouncing
 
 };
 

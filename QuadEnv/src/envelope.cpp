@@ -4,8 +4,30 @@
 
 Envelopes envelopes;
 
+void Envelopes::CheckInvertBtn()
+{
+	// check if invert button has been pressed with debounce
+	if ((GPIOF->IDR & GPIO_IDR_ID0) == 0) {
+		if (SysTickVal > invertBtnUp + 100 && !invertBtnDown) {
+			invertBtnDown = true;
+			settings.invert = !settings.invert;
+			if (settings.invert) {
+				GPIOC->ODR |= GPIO_ODR_OD13;
+			} else {
+				GPIOC->ODR &= ~GPIO_ODR_OD13;
+			}
+			config.SaveConfig();
+		}
+	} else if (invertBtnDown) {
+		invertBtnUp = SysTickVal;
+		invertBtnDown = false;
+	}
+}
+
 void Envelopes::calcEnvelopes()
 {
+	CheckInvertBtn();
+
 	for (Envelope& env : envelope) {
 		env.calcEnvelope();
 	}
@@ -138,7 +160,11 @@ void Envelope::calcEnvelope()
 		}
 	}
 
-	*outputChn = static_cast<uint32_t>(currentLevel);
+	if (envelopes.settings.invert) {
+		*outputChn = 4095 - static_cast<uint32_t>(currentLevel);
+	} else {
+		*outputChn = static_cast<uint32_t>(currentLevel);
+	}
 }
 
 
