@@ -5,6 +5,7 @@ Hardware/QuadEnv_Panel-backups/
 Hardware/QuadEnv_Components_2-backups/
 Hardware/QuadEnv_Controls_2-backups/
 Hardware/QuadEnv_Panel_2-backups/
+Hardware/QuadEnv_Components_3-backups/
 
 # Prerequisites
 *.d
@@ -45,3 +46,4 @@ Hardware/_autosave-QuadEnv_Components.kicad_sch
 *.kicad_sch-bak
 *.lck
 Hardware/_autosave-QuadEnv_Controls_2.kicad_pcb
+

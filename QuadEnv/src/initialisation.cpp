@@ -104,19 +104,20 @@ void InitIO()
 }
 
 
-//	Setup Timer 3 on an interrupt to trigger sample output
-void InitEnvTimer()
+void InitOutputTimer()
 {
-	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM3EN;			// Enable Timer 3
-	TIM3->PSC = 34;									// Set prescaler
-	TIM3->ARR = 103; 								// Set auto reload register - 170Mhz / 33 / 103 = ~50kHz
+	//	Setup Timer on an interrupt to trigger sample output
 
-	TIM3->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
-	NVIC_EnableIRQ(TIM3_IRQn);
-	NVIC_SetPriority(TIM3_IRQn, 0);					// Lower is higher priority
+	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM4EN;			// Enable Timer
+	TIM4->PSC = 34;									// Set prescaler
+	TIM4->ARR = 103; 								// Set auto reload register - 170Mhz / 33 / 103 = ~50kHz
 
-	TIM3->CR1 |= TIM_CR1_CEN;
-	TIM3->EGR |= TIM_EGR_UG;						//  Re-initializes counter and generates update of registers
+	TIM4->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
+	NVIC_EnableIRQ(TIM4_IRQn);
+	NVIC_SetPriority(TIM4_IRQn, 0);					// Lower is higher priority
+
+	TIM4->CR1 |= TIM_CR1_CEN;
+	TIM4->EGR |= TIM_EGR_UG;						//  Re-initializes counter and generates update of registers
 }
 
 
@@ -229,81 +230,57 @@ void InitCordic()
 }
 
 
-/*
-//	Setup Timer 9 to count clock cycles for coverage profiling
-void InitCoverageTimer() {
-	RCC->APB2ENR |= RCC_APB2ENR_TIM9EN;				// Enable Timer
-	TIM9->PSC = 100;
-	TIM9->ARR = 65535;
-
-	TIM9->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
-	NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
-	NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 2);		// Lower is higher priority
-
-}
-
-//	Setup Timer 5 to count time between bounces
-void InitDebounceTimer() {
-	RCC->APB1ENR |= RCC_APB1ENR_TIM5EN;				// Enable Timer
-	TIM5->PSC = 10000;
-	TIM5->ARR = 65535;
-}
-
-*/
-
-
 void InitPWMTimer()
 {
-	// TIM3: Channel 1: PA0 (AF1)
-	// 		 Channel 2: PB3 (AF1)
-	// 		 Channel 3: PB10 (AF1)
-	// 		 Channel 4: PB11 (AF1)
+	// LED PWM:
+	// Led1  PA6   TIM3_CH1  AF2
+	// Led2  PA7   TIM3_CH2  AF2
+	// Led3  PA9   TIM2_CH3  AF10
+	// Led4  PB11  TIM2_CH4  AF1
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;			// reset and clock control - advanced high performance bus - GPIO port A
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;			// reset and clock control - advanced high performance bus - GPIO port B
 	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;
+	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM3EN;
 
-	// Enable channel 1, 2, 3 PWM output pins on PA0
 	// 00: Input mode; 01: General purpose output mode; 10: Alternate function mode; 11: Analog mode (default)
-	GPIOA->MODER &= ~GPIO_MODER_MODE0_0;
-	GPIOA->AFR[0] |= GPIO_AFRL_AFSEL0_0;			// AF1
+	GPIOA->MODER &= ~(GPIO_MODER_MODE6_0 | GPIO_MODER_MODE7_0 | GPIO_MODER_MODE9_0);	// AF
+	GPIOB->MODER &= ~GPIO_MODER_MODE11_0;
 
+	GPIOA->AFR[0] |= (GPIO_AFRL_AFSEL6_1 | GPIO_AFRL_AFSEL7_1);							// AF2
+	GPIOA->AFR[1] |= 10 << GPIO_AFRH_AFSEL9_Pos;										// AF10
+	GPIOB->AFR[1] |= GPIO_AFRH_AFSEL11_0;												// AF1
 
-	// Enable channel 4 PWM output pin on PB3, PB10, PB11
-	GPIOB->MODER &= ~(GPIO_MODER_MODE3_0 | GPIO_MODER_MODE10_0 | GPIO_MODER_MODE11_0);
-	GPIOB->AFR[0] |= GPIO_AFRL_AFSEL3_0;			// AF1
-	GPIOB->AFR[1] |= (GPIO_AFRH_AFSEL10_0 | GPIO_AFRH_AFSEL11_0);					// AF1
-
-
-	// Timing calculations: Clock = 64MHz / (PSC + 1) = 32m counts per second
-	// ARR = number of counts per PWM tick = 4096
-	// 32m / ARR = 7.812kHz of PWM square wave with 4096 levels of output
-	TIM2->CCMR1 |= TIM_CCMR1_OC1PE;					// Output compare 1 preload enable
-	TIM2->CCMR1 |= TIM_CCMR1_OC2PE;					// Output compare 2 preload enable
+	TIM3->CCMR1 |= TIM_CCMR1_OC1PE;					// Output compare 1 preload enable
+	TIM3->CCMR1 |= TIM_CCMR1_OC2PE;					// Output compare 2 preload enable
 	TIM2->CCMR2 |= TIM_CCMR2_OC3PE;					// Output compare 3 preload enable
 	TIM2->CCMR2 |= TIM_CCMR2_OC4PE;					// Output compare 4 preload enable
 
-	TIM2->CCMR1 |= (TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2);	// 0110: PWM mode 1 - In upcounting, channel 1 active if TIMx_CNT<TIMx_CCR1
-	TIM2->CCMR1 |= (TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2);	// 0110: PWM mode 1 - In upcounting, channel 2 active if TIMx_CNT<TIMx_CCR2
+	TIM3->CCMR1 |= (TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2);	// 0110: PWM mode 1 - In upcounting, channel 1 active if TIMx_CNT<TIMx_CCR1
+	TIM3->CCMR1 |= (TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2);	// 0110: PWM mode 1 - In upcounting, channel 2 active if TIMx_CNT<TIMx_CCR2
 	TIM2->CCMR2 |= (TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2);	// 0110: PWM mode 1 - In upcounting, channel 3 active if TIMx_CNT<TIMx_CCR3
 	TIM2->CCMR2 |= (TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2);	// 0110: PWM mode 1 - In upcounting, channel 3 active if TIMx_CNT<TIMx_CCR3
 
-	TIM2->CCR1 = 0;									// Initialise PWM level to 0
-	TIM2->CCR2 = 0;
+	TIM3->CCR1 = 0;									// Initialise PWM level to 0
+	TIM3->CCR2 = 0;
 	TIM2->CCR3 = 0;
 	TIM2->CCR4 = 0;
 
-	TIM2->ARR = 2047;								// Total number of PWM ticks = 512
-	TIM2->PSC = 0;									// Should give ~93.7kHz
+	// Timing calculations: Clock = 170MHz / (PSC + 1) = 34m counts per second
+	// ARR = number of counts per PWM tick = 4096
+	// 34m / ARR = 8.3kHz of PWM square wave with 4096 levels of output
+	TIM2->ARR = 4095;								// Total number of PWM ticks
+	TIM2->PSC = 4;
 	TIM2->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
-	TIM2->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E);		// Capture mode enabled / OC1 signal is output on the corresponding output pin
+	TIM2->CCER |= (TIM_CCER_CC3E | TIM_CCER_CC4E);	// Capture mode enabled / OC1 signal is output on the corresponding output pin
 	TIM2->EGR |= TIM_EGR_UG;						// 1: Re-initialize the counter and generates an update of the registers
 
-	// Generate interrupt on Update
-//	TIM2->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
-//	NVIC_EnableIRQ(TIM2_IRQn);
-//	NVIC_SetPriority(TIM2_IRQn, 0);					// Lower is higher priority
+	TIM3->ARR = 4095;								// Total number of PWM ticks
+	TIM3->PSC = 4;
+	TIM3->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
+	TIM3->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E);	// Capture mode enabled / OC1 signal is output on the corresponding output pin
+	TIM3->EGR |= TIM_EGR_UG;						// 1: Re-initialize the counter and generates an update of the registers
+
 
 	TIM2->CR1 |= TIM_CR1_CEN;						// Enable counter
 }
-
 

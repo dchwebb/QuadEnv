@@ -1,7 +1,7 @@
 #pragma once
 
 #include "initialisation.h"
-
+#include "configManager.h"
 
 struct ADSR {
 	uint16_t attack;
@@ -46,12 +46,18 @@ struct Envelopes {
 
 public:
 	void calcEnvelopes();					// Calls calculation on all contained envelopes
-	uint32_t SerialiseConfig(uint8_t** buff);
-	uint32_t StoreConfig(uint8_t* buff);
+	static void VerifyConfig();
 
-	struct config_t {
+	ConfigSaver configSaver = {
+		.settingsAddress = &settings,
+		.settingsSize = sizeof(settings),
+		.validateSettings = &VerifyConfig
+	};
+
+	struct {
 		float durationMult = 1.0f;
-	} config;
+		bool invert = false;
+	} settings;
 
 private:
 	Envelope envelope[4] = {

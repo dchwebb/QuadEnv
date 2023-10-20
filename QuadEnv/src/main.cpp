@@ -2,21 +2,16 @@
 #include "envelope.h"
 #include "usb.h"
 #include "configManager.h"
-#include "SerialHandler.h"
-#include <cmath>
 
 volatile uint32_t SysTickVal;
 volatile ADSR adsr;
-
-USBHandler usb;
-SerialHandler serial(usb);
 
 extern "C" {
 #include "interrupts.h"
 }
 
+Config config{&envelopes.configSaver};		// Initialise configuration to handle saving and restoring lfo settings
 
-extern uint32_t SystemCoreClock;
 int main(void)
 {
 	SystemInit();							// Activates floating point coprocessor and resets clock
@@ -25,14 +20,14 @@ int main(void)
 	InitSysTick();
 	InitDAC();
 	InitIO();
-	InitEnvTimer();
+	InitOutputTimer();
 	InitADC(reinterpret_cast<volatile uint16_t*>(&adsr));
 	InitCordic();
-	configManager.RestoreConfig();
+	config.RestoreConfig();
 	usb.InitUSB();
 
 	while (1) {
-		serial.Command();					// Check for incoming CDC commands
+		usb.cdc.ProcessCommand();			// Check for incoming CDC commands
 	}
 }
 

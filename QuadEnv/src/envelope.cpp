@@ -36,7 +36,7 @@ void Envelope::calcEnvelope()
 			const float fullRange = 5000.0f;
 
 			// scales attack pot to allow more range at low end of pot, exponentially longer times at upper end
-			float maxDurationMult = envelopes.config.durationMult * 0.9f * 0.578;			// 0.578 allows duration to be set in seconds
+			float maxDurationMult = envelopes.settings.durationMult * 0.9f * 0.578;			// 0.578 allows duration to be set in seconds
 
 			// RC value - attackScale represents R component; maxDurationMult represents capacitor size (Reduce rc for a steeper curve)
 			float rc = std::pow(attack / 4096.f, 3.0f) * maxDurationMult;		// Using a^3 for fast approximation for measured charging rate (^2.9)
@@ -73,7 +73,7 @@ void Envelope::calcEnvelope()
 
 		case gateStates::decay: {
 			// scales decay pot to allow more range at low end of pot, exponentially longer times at upper end
-			float maxDurationMult = envelopes.config.durationMult * 5.28f * 0.227f;		// to scale maximum delay time
+			float maxDurationMult = envelopes.settings.durationMult * 5.28f * 0.227f;		// to scale maximum delay time
 
 			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
 			float rc = std::pow(static_cast<float>(adsr.decay) / 4096.0f, 2.0f) * maxDurationMult;		// Use x^2 as approximation for measured x^2.4
@@ -115,7 +115,7 @@ void Envelope::calcEnvelope()
 		if (currentLevel > 0.0f) {
 			gateState = gateStates::release;
 
-			float maxDurationMult = envelopes.config.durationMult * 1.15f;		// to scale maximum delay time
+			float maxDurationMult = envelopes.settings.durationMult * 1.15f;		// to scale maximum delay time
 
 			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
 			float rc = std::pow(static_cast<float>(adsr.release) / 4096.0f, 2.0f) * maxDurationMult;
@@ -174,23 +174,18 @@ float Envelope::CordicExp(float x)
 }
 
 
-uint32_t Envelopes::SerialiseConfig(uint8_t** buff)
+void Envelopes::VerifyConfig()
 {
-	*buff = reinterpret_cast<uint8_t*>(&config);
-	return sizeof(config);
-}
-
-
-uint32_t Envelopes::StoreConfig(uint8_t* buff)
-{
-	if (buff != nullptr) {
-		memcpy(&config, buff, sizeof(config));
-	}
+	// Verify settings and update as required
 
 	// Verify settings and update as required
-	if (config.durationMult < 0.1f || config.durationMult > 9.9f) {
-		config.durationMult = 1.0f;
+	if (envelopes.settings.durationMult < 0.1f || envelopes.settings.durationMult > 9.9f) {
+		envelopes.settings.durationMult = 1.0f;
 	}
 
-	return sizeof(config);
+	if (envelopes.settings.invert) {
+		GPIOC->ODR |= GPIO_ODR_OD13;
+	} else {
+		GPIOC->ODR &= ~GPIO_ODR_OD13;
+	}
 }

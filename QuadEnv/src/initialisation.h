@@ -16,7 +16,7 @@ void SystemClock_Config();
 void InitSysTick();
 void InitDAC();
 void InitIO();
-void InitEnvTimer();
+void InitOutputTimer();
 void InitADC(volatile uint16_t* ADC_array);
 void InitUart();
 void InitCordic();
