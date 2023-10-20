@@ -8,7 +8,7 @@
 #define PLL_P 2
 
 
-void SystemClock_Config(void) {
+void InitClocks(void) {
 	// See page 236 for clock configuration
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;		// SYSCFG + COMP + VREFBUF + OPAMP clock enable
 	RCC->APB1ENR1 |= RCC_APB1ENR1_PWREN;		// Enable Power Control clock
@@ -39,6 +39,8 @@ void SystemClock_Config(void) {
 	RCC->CFGR &= ~RCC_CFGR_HPRE_Msk;
 	RCC->CFGR |= RCC_CFGR_PPRE1_DIV1;			// PCLK1 = HCLK / 1 (APB1)
 	RCC->CFGR |= RCC_CFGR_PPRE2_DIV1;			// PCLK2 = HCLK / 1 (APB2)
+
+	SystemCoreClockUpdate();					// Update SystemCoreClock (system clock frequency) derived from settings of oscillators, prescalers and PLL
 }
 
 

@@ -11,7 +11,6 @@ struct ADSR {
 };
 
 
-
 extern volatile ADSR adsr;
 
 struct Envelope {
@@ -38,14 +37,13 @@ private:
 	volatile uint32_t* outputChn;
 	GPIO_TypeDef*      gatePort;
 	uint8_t            gatePin;
-
 };
 
 
 struct Envelopes {
 
 public:
-	void calcEnvelopes();					// Calls calculation on all contained envelopes
+	void calcEnvelopes();						// Calls calculation on all contained envelopes
 	static void VerifyConfig();
 
 	ConfigSaver configSaver = {
@@ -71,7 +69,6 @@ private:
 
 	bool invertBtnDown = false;					// To manage debouncing
 	uint32_t invertBtnUp = 0;					// Store systick time button released for debouncing
-
 };
 
 extern Envelopes envelopes;
