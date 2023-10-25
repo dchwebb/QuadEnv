@@ -24,6 +24,7 @@ private:
 	float CordicExp(float x);
 
 	float              currentLevel = 0.0f;		// The current level of the envelope (held as a float for accuracy of calulculation)
+	float              currentSpeed = 0.0f;		// The current fade-in speed of the envelope
 	uint32_t           lfoCosPos = 0;			// Position of cordic cosine wave in q1.31 format
 
 	// Hardware settings for each envelope (DAC Output, GPIO gate input)
@@ -40,10 +41,12 @@ public:
 	static void VerifyConfig();					// Check config is valid (must be static in order to store pointer)
 
 	struct {
-		float fadeInRate = 0.9996f;
+		float levelFadeIn = defaultLevelFadeIn;
+		float speedFadeIn = defaultSpeedFadeIn;
 	} settings;
 
-	float fadeInScale = (1.0f - settings.fadeInRate) / 4096.0f;
+	float levelFadeInScale = (1.0f - settings.levelFadeIn) / 4096.0f;
+	float speedFadeInScale = (1.0f - settings.speedFadeIn) / 4096.0f;
 
 	ConfigSaver configSaver = {
 		.settingsAddress = &settings,
@@ -52,6 +55,8 @@ public:
 	};
 
 private:
+	static constexpr float defaultLevelFadeIn = 0.999996f;
+	static constexpr float defaultSpeedFadeIn = 0.9999f;
 	LFO lfo[4] = {
 			{&(DAC1->DHR12R1), GPIOB, 6},		// PA4 Env1
 			{&(DAC1->DHR12R2), GPIOB, 5},		// PA5 Env2

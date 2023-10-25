@@ -41,7 +41,8 @@ void Envelope::calcEnvelope()
 			float maxDurationMult = envelopes.settings.durationMult * 0.9f * 0.578;			// 0.578 allows duration to be set in seconds
 
 			// RC value - attackScale represents R component; maxDurationMult represents capacitor size (Reduce rc for a steeper curve)
-			float rc = std::pow(attack / 4096.f, 3.0f) * maxDurationMult;		// Using a^3 for fast approximation for measured charging rate (^2.9)
+			float tempAttack = attack / 4096.f;				// Space constraints mean we can't use pow function on floats
+			float rc = tempAttack * tempAttack * tempAttack * maxDurationMult;		// Using a^3 for fast approximation for measured charging rate (^2.9)
 
 			if (rc != 0.0f) {
 				/*

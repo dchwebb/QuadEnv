@@ -1,13 +1,23 @@
 #include "USB.h"
 #include "configManager.h"
 #include "envelope.h"
+#include "lfo.h"
+#include "mode.h"
 #include <charconv>
 #include <stdarg.h>
 #include <cmath>
 
-// Check if a command has been received from USB, parse and action as required
+static inline std::tuple<uint32_t, uint32_t> SplitFloat(float val)
+{
+	uint32_t integerPart = (uint32_t)val;
+	uint32_t fractionPart = std::round((val - integerPart) * 1000000);
+	return std::make_tuple(integerPart, fractionPart);
+}
+
+
 void CDCHandler::ProcessCommand()
 {
+	// Check if a command has been received from USB, parse and action as required
 	if (!cmdPending) {
 		return;
 	}
@@ -15,23 +25,29 @@ void CDCHandler::ProcessCommand()
 	const std::string_view cmd {comCmd};
 
 	if (cmd.compare("info") == 0) {		// Print diagnostic information
-
 		// Use manual float conversion as printf with float support uses more space than we have
-		uint32_t fltIntPart = (uint32_t)envelopes.settings.durationMult;
-		uint32_t fltFrcPart = std::round((envelopes.settings.durationMult - fltIntPart) * 10000);
+		auto [intDuration, frcDuration] = SplitFloat(envelopes.settings.durationMult);
+		auto [intLevelFadeIn, frcLevelFadeIn] = SplitFloat(lfos.settings.levelFadeIn);
 
-		printf("Mountjoy QuadEnv v1.0 - Current Settings:\r\n\r\n"
+		printf("Mountjoy QuadEnv/LFO v1.0 - Current Settings:\r\n\r\n"
+				"Mode: %s\r\n"
+				"Duration Multiplier: %ld.%ld\r\n"
 				"Fade-in rate: %ld.%ld\r\n"
 				"\r\n",
-				fltIntPart, fltFrcPart);
+				mode.settings.appMode == Mode::AppMode::envelope ? "Envelope" : "LFO",
+				intDuration, frcDuration,
+				intLevelFadeIn, frcLevelFadeIn);
 
 
 	} else if (cmd.compare("help") == 0) {
 
-		usb->SendString("Mountjoy QuadEnv\r\n"
+		usb->SendString("Mountjoy QuadEnv/LFO\r\n"
 				"\r\nSupported commands:\r\n"
 				"info        -  Show diagnostic information\r\n"
-				"mult:xx.x   -  Set duration multiplier (eg 1.0 for short, 8.5 for long)\r\n"
+				"mult:xx.x   -  Set envelope duration multiplier (eg 1.0 for short, 8.5 for long)\r\n"
+				"fadein:xx.x -  Set lfo fade in rate (default 0.999996)\r\n"
+				"savecfg     -  Save config\r\n"
+				"erasecfg    -  Erase config\r\n"
 				"\r\n"
 #if (USB_DEBUG)
 				"usbdebug    -  Start USB debugging\r\n"
@@ -49,10 +65,22 @@ void CDCHandler::ProcessCommand()
 		const float mult = ParseFloat(cmd, ':', 0.1f, 99.9f);
 		if (mult >= 0.0f) {
 			envelopes.settings.durationMult = mult;
+			envelopes.VerifyConfig();
 			config.SaveConfig();
 		}
 
-	} else if (cmd.compare("eraseflash") == 0) {					// Erase config settings
+	} else if (cmd.compare(0, 7, "fadein:") == 0) {					// Set lfo fade in rate
+		const float val = ParseFloat(cmd, ':', 0.1f, 99.9f);
+		if (val >= 0.0f) {
+			lfos.settings.levelFadeIn = val;
+			lfos.VerifyConfig();
+			config.SaveConfig();
+		}
+
+	} else if (cmd.compare("savecfg") == 0) {						// Save configuration
+		config.SaveConfig();
+
+	} else if (cmd.compare("erasecfg") == 0) {						// Erase config settings
 		config.EraseConfig();
 
 	} else {

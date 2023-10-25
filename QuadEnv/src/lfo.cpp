@@ -22,12 +22,14 @@ void LFO::calcLFO(uint32_t spread)
 
 	if (adc.fadeIn > 10) {
 		if ((gatePort->IDR & (1 << gatePin)) != 0) {			// Gate on
-			currentLevel = 1.0f - (1.0f - currentLevel) * (lfos.settings.fadeInRate + (float)adc.fadeIn * lfos.fadeInScale);
+			currentLevel = 1.0f - (1.0f - currentLevel) * (lfos.settings.levelFadeIn + (float)adc.fadeIn * lfos.levelFadeInScale);
+			currentSpeed = 1.0f - (1.0f - currentSpeed) * (lfos.settings.speedFadeIn + (float)adc.fadeIn * lfos.speedFadeInScale);
 		} else {
 			currentLevel = 0.0f;
+			currentSpeed = 0.0f;
 		}
 		if (mode.settings.modeButton) {					// When mode button activated fade in the speed (as well as the level)
-			speed *= currentLevel;
+			speed *= currentSpeed;
 		}
 
 	} else {
@@ -86,8 +88,9 @@ float LFO::CordicExp(float x)
 void LFOs::VerifyConfig()
 {
 	// Verify settings and update as required
-	if (lfos.settings.fadeInRate < 0.1f || lfos.settings.fadeInRate > 0.99999999f) {
-		lfos.settings.fadeInRate = 0.9996f;
+	if (lfos.settings.levelFadeIn < 0.1f || lfos.settings.levelFadeIn > 0.99999999f) {
+		lfos.settings.levelFadeIn = defaultLevelFadeIn;
 	}
-	lfos.fadeInScale = (1.0f - lfos.settings.fadeInRate) / 4096.0f;
+	lfos.levelFadeInScale = (1.0f - lfos.settings.levelFadeIn) / 4096.0f;
+	lfos.speedFadeInScale = (1.0f - lfos.settings.speedFadeIn) / 4096.0f;
 }
