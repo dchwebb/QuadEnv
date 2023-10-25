@@ -2738,7 +2738,7 @@
     (uuid 94c2a289-2677-4b34-b3ae-ec145fa6f3e2)
   )
   (text "PA6  TIM3_CH1\nPA7  TIM3_CH2\nPA9  TIM2_CH3 TIM1_CH2\nPB11 TIM2_CH4\n"
-    (at 15.24 125.73 0)
+    (at 17.78 132.08 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid b9b0f5dd-e479-4d62-948a-d9f1f763dee9)
   )

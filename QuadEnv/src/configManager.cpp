@@ -14,6 +14,9 @@ bool Config::SaveConfig()
 		currentSettingsOffset = 0;
 	} else {
 		currentSettingsOffset += settingsSize;
+		if ((uint32_t)currentSettingsOffset > flashPageSize - settingsSize) {
+			currentSettingsOffset = 0;
+		}
 	}
 	uint32_t* flashPos = flashConfigAddr + currentSettingsOffset / 4;
 
@@ -28,12 +31,10 @@ bool Config::SaveConfig()
 		}
 	}
 
-	uint8_t configBuffer[settingsSize];					// Will hold all the data to be written to the
+	uint8_t configBuffer[settingsSize];					// Will hold all the data to be written by config savers
 	memcpy(configBuffer, ConfigHeader, 4);
-
-	// Add individual config settings to buffer after header
 	uint32_t configPos = 4;
-	for (auto& saver : configSavers) {
+	for (auto& saver : configSavers) {					// Add individual config settings to buffer after header
 		memcpy(&configBuffer[configPos], saver->settingsAddress, saver->settingsSize);
 		configPos += saver->settingsSize;
 	}
@@ -140,9 +141,7 @@ bool Config::FlashWaitForLastOperation()
 		return false;
 	}
 
-	while ((FLASH->SR & FLASH_SR_BSY) == FLASH_SR_BSY) {
-
-	}
+	while ((FLASH->SR & FLASH_SR_BSY) == FLASH_SR_BSY) {}
 
 	if ((FLASH->SR & FLASH_SR_EOP) == FLASH_SR_EOP) {		// Check End of Operation flag
 		FLASH->SR = FLASH_SR_EOP;							// Clear FLASH End of Operation pending bit

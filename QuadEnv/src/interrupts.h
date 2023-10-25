@@ -5,9 +5,8 @@ void SysTick_Handler(void) {
 
 void TIM4_IRQHandler() {
 	TIM4->SR &= ~TIM_SR_UIF;
-	//GPIOC->ODR |= GPIO_IDR_ID6;
 	envelopes.calcEnvelopes();
-	//GPIOC->ODR &= ~GPIO_ODR_ODR_6;
+	//	lfos.calcLFOs();
 }
 
 void USB_LP_IRQHandler() {
