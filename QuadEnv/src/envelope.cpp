@@ -1,33 +1,13 @@
 #include "envelope.h"
+#include "mode.h"
 #include <cmath>
 #include <cstring>
 
 Envelopes envelopes;
 
-void Envelopes::CheckInvertBtn()
-{
-	// check if invert button has been pressed with debounce
-	if ((GPIOF->IDR & GPIO_IDR_ID0) == 0) {
-		if (SysTickVal > invertBtnUp + 100 && !invertBtnDown) {
-			invertBtnDown = true;
-			settings.invert = !settings.invert;
-			if (settings.invert) {
-				GPIOC->ODR |= GPIO_ODR_OD13;
-			} else {
-				GPIOC->ODR &= ~GPIO_ODR_OD13;
-			}
-			config.SaveConfig();
-		}
-	} else if (invertBtnDown) {
-		invertBtnUp = SysTickVal;
-		invertBtnDown = false;
-	}
-}
 
 void Envelopes::calcEnvelopes()
 {
-	CheckInvertBtn();
-
 	for (Envelope& env : envelope) {
 		env.calcEnvelope();
 	}
@@ -160,7 +140,7 @@ void Envelope::calcEnvelope()
 		}
 	}
 
-	if (envelopes.settings.invert) {
+	if (mode.settings.modeButton) {					// Invert envelope when mode button activated
 		*outputChn = 4095 - static_cast<uint32_t>(currentLevel);
 	} else {
 		*outputChn = static_cast<uint32_t>(currentLevel);
@@ -203,15 +183,7 @@ float Envelope::CordicExp(float x)
 void Envelopes::VerifyConfig()
 {
 	// Verify settings and update as required
-
-	// Verify settings and update as required
 	if (envelopes.settings.durationMult < 0.1f || envelopes.settings.durationMult > 9.9f) {
 		envelopes.settings.durationMult = 1.0f;
-	}
-
-	if (envelopes.settings.invert) {
-		GPIOC->ODR |= GPIO_ODR_OD13;
-	} else {
-		GPIOC->ODR &= ~GPIO_ODR_OD13;
 	}
 }

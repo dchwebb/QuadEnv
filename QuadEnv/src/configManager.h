@@ -13,7 +13,7 @@ struct ConfigSaver {
 
 class Config {
 public:
-	static constexpr uint32_t configVersion = 2;
+	static constexpr uint32_t configVersion = 3;
 
 	// STM32G431 is Category 2 (manual p74). Flash : 16 pages * 2k = 32k
 	static constexpr uint32_t flashConfigPage = 16;

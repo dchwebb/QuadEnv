@@ -3,14 +3,14 @@
 #include "initialisation.h"
 #include "configManager.h"
 
-struct ADC {
+struct LFOPots {
 	uint16_t speed;
 	uint16_t spread;
 	uint16_t fadeIn;
 	uint16_t level;
 };
 
-extern volatile ADC adc;
+extern volatile LFOPots& adc;
 
 struct LFO {
 public:
@@ -41,7 +41,6 @@ public:
 
 	struct {
 		float fadeInRate = 0.9996f;
-		bool fadeInSpeed = false;				// True when speed fade in activated
 	} settings;
 
 	float fadeInScale = (1.0f - settings.fadeInRate) / 4096.0f;
@@ -53,17 +52,12 @@ public:
 	};
 
 private:
-	void CheckFadeInBtn();
-
 	LFO lfo[4] = {
 			{&(DAC1->DHR12R1), GPIOB, 6},		// PA4 Env1
 			{&(DAC1->DHR12R2), GPIOB, 5},		// PA5 Env2
 			{&(DAC3->DHR12R2), GPIOB, 4},		// PB1 Env3
 			{&(DAC3->DHR12R1), GPIOB, 3} 		// PA2 Env4
 	};
-
-	bool fadeInBtnDown = false;					// To manage debouncing
-	uint32_t fadeInBtnUp = 0;					// Store systick time button released for debouncing
 };
 
 extern LFOs lfos;

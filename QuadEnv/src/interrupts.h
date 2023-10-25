@@ -5,8 +5,12 @@ void SysTick_Handler(void) {
 
 void TIM4_IRQHandler() {
 	TIM4->SR &= ~TIM_SR_UIF;
-	envelopes.calcEnvelopes();
-	//	lfos.calcLFOs();
+	mode.CheckButton();
+	if (mode.settings.appMode == Mode::AppMode::envelope) {
+		envelopes.calcEnvelopes();
+	} else {
+		lfos.calcLFOs();
+	}
 }
 
 void USB_LP_IRQHandler() {

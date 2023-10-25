@@ -1,16 +1,20 @@
 #include "initialisation.h"
 #include "envelope.h"
+#include "lfo.h"
 #include "usb.h"
 #include "configManager.h"
+#include "Mode.h"
 
 volatile uint32_t SysTickVal;
 volatile ADSR adsr;
+volatile LFOPots& adc = (volatile LFOPots&)adsr;
 
 extern "C" {
 #include "interrupts.h"
 }
 
-Config config{&envelopes.configSaver};		// Initialise configuration to handle saving and restoring lfo settings
+// Initialise configuration to handle saving and restoring mode, envelope and lfo settings
+Config config{&mode.configSaver, &envelopes.configSaver, &lfos.configSaver};
 
 int main(void)
 {

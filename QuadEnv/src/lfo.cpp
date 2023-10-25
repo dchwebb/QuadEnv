@@ -1,36 +1,13 @@
 #include "lfo.h"
-
+#include "mode.h"
 #include <cmath>
 #include <cstring>
 
 LFOs lfos;
 
 
-void LFOs::CheckFadeInBtn()
-{
-	// check if fade-in button has been pressed with debounce
-	if ((GPIOF->IDR & GPIO_IDR_ID0) == 0) {
-		if (SysTickVal > fadeInBtnUp + 100 && !fadeInBtnDown) {
-			fadeInBtnDown = true;
-			settings.fadeInSpeed = !settings.fadeInSpeed;
-			if (settings.fadeInSpeed) {
-				GPIOC->ODR |= GPIO_ODR_OD13;
-			} else {
-				GPIOC->ODR &= ~GPIO_ODR_OD13;
-			}
-			config.SaveConfig();
-		}
-	} else if (fadeInBtnDown) {
-		fadeInBtnUp = SysTickVal;
-		fadeInBtnDown = false;
-	}
-}
-
-
 void LFOs::calcLFOs()
 {
-	CheckFadeInBtn();				// check if fade-in speed button has been pressed
-
 	for (uint8_t i = 0; i < 4; ++i) {
 		// Calculate lfo speed spread
 		uint32_t lfoSpread = static_cast<uint32_t>(static_cast<float>(adc.spread) * i * 3);
@@ -49,7 +26,7 @@ void LFO::calcLFO(uint32_t spread)
 		} else {
 			currentLevel = 0.0f;
 		}
-		if (lfos.settings.fadeInSpeed) {
+		if (mode.settings.modeButton) {					// When mode button activated fade in the speed (as well as the level)
 			speed *= currentLevel;
 		}
 
@@ -109,15 +86,8 @@ float LFO::CordicExp(float x)
 void LFOs::VerifyConfig()
 {
 	// Verify settings and update as required
-
 	if (lfos.settings.fadeInRate < 0.1f || lfos.settings.fadeInRate > 0.99999999f) {
 		lfos.settings.fadeInRate = 0.9996f;
 	}
 	lfos.fadeInScale = (1.0f - lfos.settings.fadeInRate) / 4096.0f;
-
-	if (lfos.settings.fadeInSpeed) {
-		GPIOC->ODR |= GPIO_ODR_OD13;
-	} else {
-		GPIOC->ODR &= ~GPIO_ODR_OD13;
-	}
 }
