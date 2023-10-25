@@ -91,6 +91,9 @@ void LFOs::VerifyConfig()
 	if (lfos.settings.levelFadeIn < 0.1f || lfos.settings.levelFadeIn > 0.99999999f) {
 		lfos.settings.levelFadeIn = defaultLevelFadeIn;
 	}
+	if (lfos.settings.speedFadeIn < 0.1f || lfos.settings.speedFadeIn > 0.99999999f) {
+		lfos.settings.speedFadeIn = defaultLSpeedFadeIn;
+	}
 	lfos.levelFadeInScale = (1.0f - lfos.settings.levelFadeIn) / 4096.0f;
 	lfos.speedFadeInScale = (1.0f - lfos.settings.speedFadeIn) / 4096.0f;
 }
