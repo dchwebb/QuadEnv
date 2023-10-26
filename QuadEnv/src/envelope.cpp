@@ -34,15 +34,15 @@ void Envelope::calcEnvelope()
 
 			attack = std::round(((attack * 31.0f) + static_cast<float>(adsr.attack)) / 32.0f);
 
-			// fullRange = value of fully charged capacitor; comparitor value is 4096 where cap is charged enough to trigger decay phase
+			// fullRange = value of fully charged capacitor; capacitor value is 4096 where cap is charged enough to trigger decay phase
 			const float fullRange = 5000.0f;
 
 			// scales attack pot to allow more range at low end of pot, exponentially longer times at upper end
-			float maxDurationMult = envelopes.settings.durationMult * 0.9f * 0.578;			// 0.578 allows duration to be set in seconds
+			const float maxDurationMult = envelopes.settings.durationMult * 0.9f * 0.578;			// 0.578 allows duration to be set in seconds
 
 			// RC value - attackScale represents R component; maxDurationMult represents capacitor size (Reduce rc for a steeper curve)
-			float tempAttack = attack / 4096.f;				// Space constraints mean we can't use pow function on floats
-			float rc = tempAttack * tempAttack * tempAttack * maxDurationMult;		// Using a^3 for fast approximation for measured charging rate (^2.9)
+			const float tempAttack = attack / 4096.f;				// Space constraints mean we can't use pow function on floats
+			const float rc = tempAttack * tempAttack * tempAttack * maxDurationMult;		// Using a^3 for fast approximation for measured charging rate (^2.9)
 
 			if (rc != 0.0f) {
 				/*
@@ -76,10 +76,10 @@ void Envelope::calcEnvelope()
 
 		case gateStates::decay: {
 			// scales decay pot to allow more range at low end of pot, exponentially longer times at upper end
-			float maxDurationMult = envelopes.settings.durationMult * 5.28f * 0.227f;		// to scale maximum delay time
+			const float maxDurationMult = envelopes.settings.durationMult * 5.28f * 0.227f;		// to scale maximum delay time
 
 			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
-			float rc = std::pow(static_cast<float>(adsr.decay) / 4096.0f, 2.0f) * maxDurationMult;		// Use x^2 as approximation for measured x^2.4
+			const float rc = std::pow(static_cast<float>(adsr.decay) / 4096.0f, 2.0f) * maxDurationMult;		// Use x^2 as approximation for measured x^2.4
 
 			if (rc != 0.0f && currentLevel > sustain) {
 				/*
@@ -118,10 +118,10 @@ void Envelope::calcEnvelope()
 		if (currentLevel > 0.0f) {
 			gateState = gateStates::release;
 
-			float maxDurationMult = envelopes.settings.durationMult * 1.15f;		// to scale maximum delay time
+			const float maxDurationMult = envelopes.settings.durationMult * 1.15f;		// to scale maximum delay time
 
 			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
-			float rc = std::pow(static_cast<float>(adsr.release) / 4096.0f, 2.0f) * maxDurationMult;
+			const float rc = std::pow(static_cast<float>(adsr.release) / 4096.0f, 2.0f) * maxDurationMult;
 			if (rc != 0.0f && currentLevel > 1.0f) {
 				/*
 				 * Long hand calculations:
