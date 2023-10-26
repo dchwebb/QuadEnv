@@ -44,9 +44,9 @@ A CD40109B level shifter provides input protection for the Gate In signals. A TL
 
 Construction is a sandwich of three PCBs with a component board, a controls board and a panel. PCBs designed in Kicad v6.
 
-[Components schematic](https://raw.githubusercontent.com/dchwebb/QuadEnv/master/Component_Schematic.pdf)
+[Components schematic v2](https://raw.githubusercontent.com/dchwebb/QuadEnv/master/Component_Schematic_v2.pdf)
 
-[Controls schematic](https://raw.githubusercontent.com/dchwebb/QuadEnv/master/Control_Schematic.pdf)
+[Controls schematic v2](https://raw.githubusercontent.com/dchwebb/QuadEnv/master/Control_Schematic.pdf)
 
 ### Power
 
