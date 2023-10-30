@@ -280,13 +280,13 @@ void InitPWMTimer()
 	TIM2->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
 	TIM2->CCER |= (TIM_CCER_CC3E | TIM_CCER_CC4E);	// Capture mode enabled / OC1 signal is output on the corresponding output pin
 	TIM2->EGR |= TIM_EGR_UG;						// 1: Re-initialize the counter and generates an update of the registers
+	TIM2->CR1 |= TIM_CR1_CEN;						// Enable counter
 
 	TIM3->ARR = 4095;								// Total number of PWM ticks
 	TIM3->PSC = 4;
 	TIM3->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
 	TIM3->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E);	// Capture mode enabled / OC1 signal is output on the corresponding output pin
 	TIM3->EGR |= TIM_EGR_UG;						// 1: Re-initialize the counter and generates an update of the registers
-
-	TIM2->CR1 |= TIM_CR1_CEN;						// Enable counter
+	TIM3->CR1 |= TIM_CR1_CEN;						// Enable counter
 }
 

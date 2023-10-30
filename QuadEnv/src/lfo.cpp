@@ -37,7 +37,9 @@ void LFO::calcLFO(uint32_t spread)
 	}
 
 	lfoCosPos += (speed + 20) * 200 + spread;
-	*outputChn = static_cast<uint32_t>(CordicCos(lfoCosPos) * adc.level * currentLevel);			// Will output value from 0 - 4095
+	uint32_t output = static_cast<uint32_t>(CordicCos(lfoCosPos) * adc.level * currentLevel);			// Will output value from 0 - 4095
+	*outputChn = output;
+	*ledPWM = output;
 }
 
 

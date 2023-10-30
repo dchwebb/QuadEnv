@@ -24,6 +24,7 @@ int main(void)
 	InitDAC();
 	InitIO();
 	InitOutputTimer();
+	InitPWMTimer();
 	InitADC(reinterpret_cast<volatile uint16_t*>(&adsr));
 	InitCordic();
 	config.RestoreConfig();

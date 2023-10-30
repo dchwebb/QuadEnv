@@ -9,14 +9,13 @@ struct ADSR {
 	uint16_t sustain;
 	uint16_t release;
 };
-
-
 extern volatile ADSR adsr;
+
 
 struct Envelope {
 public:
-	Envelope(volatile uint32_t* outputChn, GPIO_TypeDef* gatePort, uint8_t gatePin)
-	 : outputChn{outputChn}, gatePort{gatePort}, gatePin{gatePin} {}
+	Envelope(volatile uint32_t* outputChn, GPIO_TypeDef* gatePort, uint8_t gatePin, volatile uint32_t* ledPWM)
+	 : outputChn{outputChn}, gatePort{gatePort}, gatePin{gatePin}, ledPWM{ledPWM} {}
 
 	void calcEnvelope();							// Sets the DAC level for envelope
 
@@ -32,10 +31,11 @@ private:
 	enum class      gateStates {off, attack, decay, sustain, release};
 	gateStates      gateState = gateStates::off;
 
-	// Hardware settings for each envelope (DAC Output, GPIO gate input)
+	// Hardware settings for each envelope (DAC Output, GPIO gate input, LED PWM)
 	volatile uint32_t* outputChn;
 	GPIO_TypeDef*      gatePort;
 	uint8_t            gatePin;
+	volatile uint32_t* ledPWM;
 };
 
 
@@ -57,11 +57,12 @@ public:
 
 private:
 	Envelope envelope[4] = {
-			{&(DAC1->DHR12R1), GPIOB, 6},		// PA4 Env1
-			{&(DAC1->DHR12R2), GPIOB, 5},		// PA5 Env2
-			{&(DAC3->DHR12R2), GPIOB, 4},		// PB1 Env3
-			{&(DAC3->DHR12R1), GPIOB, 3} 		// PA2 Env4
+			{&(DAC1->DHR12R1), GPIOB, 6, &TIM3->CCR1},		// Env1: PB3 Gate; PA6  PWM LED
+			{&(DAC1->DHR12R2), GPIOB, 5, &TIM3->CCR2},		// Env2: PB5 Gate; PA7  PWM LED
+			{&(DAC3->DHR12R2), GPIOB, 4, &TIM2->CCR3},		// Env3: PB4 Gate; PA9  PWM LED
+			{&(DAC3->DHR12R1), GPIOB, 3, &TIM2->CCR4} 		// Env4: PB6 Gate; PB11 PWM LED
 	};
 };
+
 
 extern Envelopes envelopes;

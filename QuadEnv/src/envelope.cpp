@@ -143,8 +143,10 @@ void Envelope::calcEnvelope()
 
 	if (mode.settings.modeButton) {					// Invert envelope when mode button activated
 		*outputChn = 4095 - static_cast<uint32_t>(currentLevel);
+		*ledPWM = 4095 - static_cast<uint32_t>(currentLevel);
 	} else {
 		*outputChn = static_cast<uint32_t>(currentLevel);
+		*ledPWM = static_cast<uint32_t>(currentLevel);
 	}
 }
 
