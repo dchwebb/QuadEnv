@@ -51,7 +51,9 @@ bool Config::SaveConfig()
 	FlashLock();						// Lock Flash
 	__enable_irq(); 					// Enable Interrupts
 
-	printf(result ? "Config Saved\r\n" : "Error saving config\r\n");
+	printf(result ? "Config Saved (%lu bytes at %#010lx)\r\n" : "Error saving config(%lu bytes at %#010lx)\r\n",
+		settingsSize, (uint32_t)flashPos);
+
 	return result;
 }
 
